@@ -9,6 +9,8 @@ from django.views.generic import FormView
 # @ users forms
 from .forms import CustomUserCreationForm, CustomUserAuthForm, CustomUserEmailConfirm, CustomUserChangeForm, CompanyDetailsForm, CustomUserChangePasswordForm, ExtendedUserCreationForm, ShippingFormSet
 
+from mail.views import send_message 
+
 # @ users models
 from .models import CompanyDetails, ShippingAddress, CustomUsers
 
@@ -311,28 +313,35 @@ def user_info(request):
 
         # -- personal details
         user_form = CustomUserChangeForm(request.POST, instance=CustomUsers.objects.get(id=request.user.pk))
-        if user_form.is_valid():
-            user_form.save()
-        else:
-            messages.error(request, 'A user with this data already exists')
-            return redirect(reverse_lazy('user_info'))
 
         # -- company details
         company_form = CompanyDetailsForm(request.POST, instance=CompanyDetails.objects.get(user_id=request.user.pk))
-        if company_form.is_valid():
-            company_form.save()
-
 
         # -- shipping details
         shipping_formset = ShippingFormSet(request.POST)
+        
+        # --> update forms
+        if user_form.is_valid():
+            user_form.save()
+            
+            send_message()
 
-        # * get cleaned data
+        else:
+            messages.error(request, 'A user with this data already exists')
+            return redirect(reverse_lazy('user_info'))
+        if company_form.is_valid():
+            company_form.save()
+            
+            send_message()
+
+
+        # <-- get cleaned data
         clean_data = shipping_formset.cleaned_data 
         
-        # * create exists bool
+        # -- create exists bool
         exists = False
 
-        # * update shipping       
+        # --> update shipping       
         if shipping_formset.has_changed():
             for i, shipping in enumerate(shipping_formset):
 

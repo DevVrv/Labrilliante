@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import json
 from django.http import HttpResponse
 from django.core.mail import send_mail

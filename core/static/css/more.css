@@ -13,6 +13,14 @@
     visibility: hidden;
 }
 
+.alert {
+    animation: show 0.3s ease;
+}
+
+.form-error {
+    border: 1px solid #dc354663;
+}
+
 .bg-op-dark {
     background-color: #3c3f3f6a;
 }
