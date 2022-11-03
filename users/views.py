@@ -1,4 +1,4 @@
-from django.core.mail import send_mail
+# from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth import update_session_auth_hash
@@ -9,7 +9,11 @@ from django.views.generic import FormView
 # @ users forms
 from .forms import CustomUserCreationForm, CustomUserAuthForm, CustomUserEmailConfirm, CustomUserChangeForm, CompanyDetailsForm, CustomUserChangePasswordForm, ExtendedUserCreationForm, ShippingFormSet
 
-from mail.views import send_message 
+# @ mail
+from core.settings import DEFAULT_FROM_EMAIL
+from django.core import mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 # @ users models
 from .models import CompanyDetails, ShippingAddress, CustomUsers
@@ -19,6 +23,7 @@ import random
 
 # @ Tools
 from tools.inspector import inspect_level, inspect_type
+
 
 # ! --------------- Views --------------- ! #
 
@@ -323,17 +328,11 @@ def user_info(request):
         # --> update forms
         if user_form.is_valid():
             user_form.save()
-            
-            send_message()
-
         else:
             messages.error(request, 'A user with this data already exists')
             return redirect(reverse_lazy('user_info'))
         if company_form.is_valid():
             company_form.save()
-            
-            send_message()
-
 
         # <-- get cleaned data
         clean_data = shipping_formset.cleaned_data 
@@ -364,6 +363,48 @@ def user_info(request):
 
         # -- success message create
         messages.success(request, 'Data has been successfully changed')
+
+
+        # --> send email for manager
+
+        user = request.user
+        user_login = user.username
+        user_first_name = user.first_name
+        user_last_name = user.last_name
+        user_email = user.email
+        user_tel = user.tel
+
+        company = CompanyDetails.objects.get(pk=user.id)
+        company_name = company.company_name
+        company_email = company.company_email
+        company_tel = company.company_tel
+        company_address = company.company_address
+
+        manager = CustomUsers.objects.get(pk=user.manager.id)
+        manager_email = manager.email
+
+        subject = f'User {user_login} has been updated'
+        html_message = render_to_string('user_info_mail.html', {
+            'user_first_name': user_first_name,
+            'user_last_name': user_last_name or '--',
+            'user_login': user_login,
+            'user_tel': user_tel or '--',
+            'user_email': user_email or '--',
+
+            'company_name': company_name,
+            'company_email': company_email,
+            'company_tel': company_tel,
+            'company_address': company_address,
+        })
+        plain_message = strip_tags(html_message)
+        from_email = DEFAULT_FROM_EMAIL
+        if manager_email == '':
+            to = DEFAULT_FROM_EMAIL
+        else:
+            to = manager_email
+
+        mail_result = mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
 
         # -- update user info
         return redirect(reverse_lazy('user_info'))

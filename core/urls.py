@@ -17,8 +17,6 @@ urlpatterns = [
 
     path('orders/', include('orders.urls')),
 
-    path('mail/', include('mail.urls')),
-
     path('share/', include('share.urls'))
 ]
 
