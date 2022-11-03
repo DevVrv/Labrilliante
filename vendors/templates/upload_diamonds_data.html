@@ -59,6 +59,12 @@
                             <a href="/admin/" class="fs-6 link-def">Get back to admin</a>
                         </div>
                     {% endif %}
+                    {% if user.user_type == 2%}
+                    {% comment %} * links * {% endcomment %}
+                    <div class="col-12 mt-4 d-flex justify-content-evenly align-items-center">
+                        <a href="/user/signout/" class="fs-6 link-def">Signout</a>
+                    </div>
+                    {% endif %}
                 </div>
             </form>
             

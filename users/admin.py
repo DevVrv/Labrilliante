@@ -8,6 +8,7 @@ class CustomUsersAdmin(admin.ModelAdmin):
 
     list_display = (
       'id', 
+      'user_type',
       'username', 
       'level', 
       'manager', 
@@ -15,7 +16,7 @@ class CustomUsersAdmin(admin.ModelAdmin):
       'last_name', 
       'job_title', 
       'email', 
-      'tel'
+      'tel',
     )
     list_display_links = ('id', 'username')
     list_editable = ('level', 'manager')
