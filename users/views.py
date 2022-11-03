@@ -34,7 +34,7 @@ class SignUpView(FormView):
     # -- class settings
     template_name = 'signup.html'
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('signin')
+    success_url = reverse_lazy('signup_finish')
     extra_context = {
         'title': 'Registration'
     }
@@ -142,29 +142,45 @@ class SignInView(FormView):
         # -- recaptcha
         if self.request.recaptcha_is_valid:
             # -- form is valid
-            user_inspect = CustomUsers.objects.get(username=form.cleaned_data.get('username'))
-            user_type = user_inspect.user_type
+            user = CustomUsers.objects.get(username=form.cleaned_data.get('username'))
+            user_type = user.user_type
             form_type = int(form.cleaned_data.get('user_type'))
 
             # * client door
             if user_type == form_type and user_type == 1:
 
-                if user_inspect.level == 0:
-                    user_inspect.level = 1
+                if user.level == 0:
+                    user.level = 1
 
                 if form.cleaned_data.get('remember_me') == True or form.cleaned_data.get('remember_me') == 1:
-                    user_inspect.remember_me = 1
+                    user.remember_me = 1
 
-                user_inspect.save()
+                user.save()
 
-                login(self.request, user_inspect)
-                return redirect(reverse_lazy('user_info'))
+                # -- create secret key
+                code = random.randrange(100000, 999999)
+
+                self.request.session['user_email'] = user.email
+                self.request.session['user_id'] = user.id
+                self.request.session['confirm_code'] = code
+                
+                # --> send code
+                subject = 'Activation code for b2b.Labrilliante.com'
+                html_message = render_to_string('signin_code.html', {
+                    'login': user.username,
+                    'code': code 
+                })
+                plain_message = strip_tags(html_message)
+                from_email = DEFAULT_FROM_EMAIL
+                to = user.email
+                mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
+                return redirect(reverse_lazy('email_confirm'))
                 
             # * vendor door
             elif user_type == form_type and user_type == 2:
-                login(self.request, user_inspect)
+                login(self.request, user)
                 return redirect(reverse_lazy('white'))
-
             else:
                 messages.error(self.request, 'Check the correctness of the entered data')
                 return redirect(reverse_lazy('signin'))
@@ -182,74 +198,47 @@ class SignInView(FormView):
             return super().get(request, *args, **kwargs)
 
 
+# * ------------------------------------------------------------------- SignUp finish
+def signup_finish(request):
+    context = {}
+    return render(request, 'signup_finish.html', context)
+
+
 # * ------------------------------------------------------------------- Confirm
 def confirm_user(request):
 
-    # -- try to get user email
+    # -- try to get user email and id
+
     try:
         # -- user email
-        user_email = request.session['user_email']
+        confirm_code = request.session['confirm_code']
+        user_id = request.session['user_id']
+        user = CustomUsers.objects.get(pk=user_id)
+        timer = request.session['timer'] or False
+
     except KeyError:
         # -- redirect to signin
         return redirect(reverse_lazy('signin'))
 
+
     # -- create confirm form
-    form = CustomUserEmailConfirm()
-    
-    # -- get user
-    user = CustomUsers.objects.filter(username=request.session['user_login'])
-    this_user = user.get(username=request.session['user_login'])
+    form = CustomUserEmailConfirm(request.POST or None)
 
-    # -- try code resend
-    try:
-        request.session['resend_code']
-        # -- get code from request session
-        confirm_code = int(request.session['confirm_code'])
-        # -- code whas resended
-        resended = True
-    except KeyError:
-        # -- get code from request session
-        confirm_code = int(request.session['confirm_code'])
-        # -- code whas not resended
-        resended = False
-
-    #  @ POST
     if request.method == 'POST':
-
-        # -- create confirm form
-        form = CustomUserEmailConfirm(request.POST)
-
-        #  -- check valid
         if form.is_valid():
-
-            # -- get form code
-            form_code = int(form.cleaned_data.get('code'))
-
-            # -- accept code
-            if form_code == confirm_code:
-
-                # -- check user level
-                if this_user.level == '0':
-                    this_user.level = '1'
-                
-                # -- remember me update
-                user.update(remember_me=request.session['remember_me'])
-                    
-                # -- login in
-                login(request, this_user)
-
-                # -- create success message
-                messages.success(request, 'Authorization was successful')
+            if int(form.cleaned_data.get('code')) == int(confirm_code):
+                messages.success(request, 'Success, entered code is valid')
+                login(request, user)
             else:
-                # -- create error message
-                messages.error(request, 'Invalid confirmation code')
-
+                messages.error(request, 'Entered code is not valid')
+                return redirect(reverse_lazy('email_confirm'))
+   
     # -- create context
     context = {
         'title': 'Email Confirm',
         'form': form,
-        'user_email': user_email,
-        'timer': resended
+        'user_email': user.email,
+        'timer': timer
     }
 
     # -- render template
@@ -258,26 +247,36 @@ def confirm_user(request):
 
 # * ------------------------------------------------------------------- Confirm again
 def confirm_user_again(request):
-    # -- try to get user email
+
+    # -- try to get user email and id
     try:
         # -- user email
-        user_email = request.session['user_email']
+        user_id = request.session['user_id']
+        user = CustomUsers.objects.get(pk=user_id)
+
     except KeyError:
         # -- redirect to signin
         return redirect(reverse_lazy('signin'))
 
-    # -- resend code
-    request.session['resend_code'] = True
 
-    # -- create confirm code
-    confirm_code = random.randint(100000, 999999)
+    # -- get new code
+    confirm_code = random.randrange(100000, 999999)
     request.session['confirm_code'] = confirm_code
 
-    # -- email settings
-    subject = 'Подтверждение email LaBrilliante.com'
-    content = f'Ваш код активации: {confirm_code}'
-    from_mail = 'dev.vrv@yandex.ru'
-    mail = send_mail(subject, content, from_mail, [user_email], fail_silently=False)
+    # --> send code
+    subject = 'Activation code for b2b.Labrilliante.com'
+    html_message = render_to_string('signin_code.html', {
+        'login': user.username,
+        'code': confirm_code 
+    })
+    plain_message = strip_tags(html_message)
+    from_email = DEFAULT_FROM_EMAIL
+    to = user.email
+    mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
+    # -- add message
+    messages.info(request, 'New code was sended on your email')
+    request.session['timer'] = 60
 
     # -- return to confirm
     return redirect(reverse_lazy('email_confirm'))

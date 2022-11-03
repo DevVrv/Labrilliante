@@ -57,52 +57,95 @@
                                         }, 3000);
                                     </script>
                                 </div>
+                            {% elif message.tags == 'info' %}
 
+                                {% include 'inc/messages/_info.html' %}
+                                    {% comment %} code input {% endcomment %}
+                                    <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center">
+                                        <p class="login__info w-100 d-flex align-items-center py-3">
+                                            <span class="d-block">The confirmation code has been sent to your Email:</span>
+                                            <span class="d-block text-primary ms-2">{{user.email}}</span>
+                                        </p>
+    
+                                        {% for input in form %}
+                                            {{input}}
+                                        {% endfor %}
+    
+                                    </div>
+    
+                                    {% comment %} send new code {% endcomment %}
+                                    <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center" id="resend_timer_container">
+    
+                                        {% if timer %}
+    
+                                            <div class="login__info w-100 d-flex align-items-center justify-content-center py-3">
+                                                <span class="d-block">You will be able to resend the code after</span>
+                                                <span class="d-block ms-2 fs-4 link" id="resend_timer"></span>
+                                                <i class="fa fa-clock-o ms-1 fs-5 link" aria-hidden="true"></i>
+                                            </div>
+    
+                                        {% else %}
+                                            
+                                            <div class="login__info w-100 d-flex align-items-center justify-content-between py-3">
+                                                <span>Didn't get the code ?</span>
+                                                <a href="{% url 'email_confirm_again' %}" id="resend_mail_code" class="btn btn-secondary">Send the code again</a>
+                                            </div>
+    
+                                        {% endif %}
+    
+                                    </div>
+                                    
+                                    {% comment %} submit {% endcomment %}
+                                    <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            Confirm
+                                        </button>
+                                    </div>
                             {% else %}
                                 {% comment %} error allert {% endcomment %}
                                 {% include 'inc/messages/_error.html' %}
-                            
                                 {% comment %} code input {% endcomment %}
-                                <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center">
-                                    <p class="login__info w-100 d-flex align-items-center py-3">
-                                        <span class="d-block">The confirmation code has been sent to your Email:</span>
-                                        <span class="d-block text-primary ms-2">{{user.email}}</span>
-                                    </p>
+                                    <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center">
+                                        <p class="login__info w-100 d-flex align-items-center py-3">
+                                            <span class="d-block">The confirmation code has been sent to your Email:</span>
+                                            <span class="d-block text-primary ms-2">{{user.email}}</span>
+                                        </p>
 
-                                    {% for input in form %}
-                                        {{input}}
-                                    {% endfor %}
+                                        {% for input in form %}
+                                            {{input}}
+                                        {% endfor %}
 
-                                </div>
+                                    </div>
 
-                                {% comment %} send new code {% endcomment %}
-                                <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center" id="resend_timer_container">
+                                    {% comment %} send new code {% endcomment %}
+                                    <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center" id="resend_timer_container">
 
-                                    {% if timer %}
+                                        {% if timer %}
 
-                                        <div class="login__info w-100 d-flex align-items-center justify-content-center py-3">
-                                            <span class="d-block">You will be able to resend the code after</span>
-                                            <span class="d-block ms-2 fs-4 link" id="resend_timer"></span>
-                                            <i class="fa fa-clock-o ms-1 fs-5 link" aria-hidden="true"></i>
-                                        </div>
+                                            <div class="login__info w-100 d-flex align-items-center justify-content-center py-3">
+                                                <span class="d-block">You will be able to resend the code after</span>
+                                                <span class="d-block ms-2 fs-4 link" id="resend_timer"></span>
+                                                <i class="fa fa-clock-o ms-1 fs-5 link" aria-hidden="true"></i>
+                                            </div>
 
-                                    {% else %}
-                                        
-                                        <div class="login__info w-100 d-flex align-items-center justify-content-between py-3">
-                                            <span>Didn't get the code ?</span>
-                                            <a href="{% url 'email_confirm_again' %}" id="resend_mail_code" class="btn btn-secondary">Send the code again</a>
-                                        </div>
+                                        {% else %}
+                                            
+                                            <div class="login__info w-100 d-flex align-items-center justify-content-between py-3">
+                                                <span>Didn't get the code ?</span>
+                                                <a href="{% url 'email_confirm_again' %}" id="resend_mail_code" class="btn btn-secondary">Send the code again</a>
+                                            </div>
 
-                                    {% endif %}
+                                        {% endif %}
 
-                                </div>
-                                
-                                {% comment %} submit {% endcomment %}
-                                <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        Confirm
-                                    </button>
-                                </div>
+                                    </div>
+                                    
+                                    {% comment %} submit {% endcomment %}
+                                    <div class="col-12 mt-4 d-flex flex-column align-items-center justify-content-center">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            Confirm
+                                        </button>
+                                    </div>
+
 
                             {% endif %}
                                 

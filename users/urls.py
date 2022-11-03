@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SignUpView, SignInView, SignUpViewExtended, confirm_user, change_pass, confirm_user_again, user_info, logout_view
+from .views import SignUpView, SignInView, SignUpViewExtended, confirm_user, change_pass, confirm_user_again, user_info, logout_view, signup_finish
 
 from .decorators import check_recaptcha
 
@@ -7,6 +7,9 @@ urlpatterns = [
 
     # * -------------------------------------------------------------------- create new user
     path('signup/', check_recaptcha(SignUpView.as_view()), name='signup'),
+
+    # * -------------------------------------------------------------------- create new user finish
+    path('signup/finish/', signup_finish, name='signup_finish'),
 
     # * -------------------------------------------------------------------- create new user
     path('signup/extended/', check_recaptcha(SignUpViewExtended.as_view()), name='signup_extended'),

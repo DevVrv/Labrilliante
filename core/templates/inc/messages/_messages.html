@@ -9,10 +9,16 @@
         {% elif message.tags == 'success' %}
             {% include 'inc/messages/_success.html' %}
 
+        {% comment %} Info {% endcomment %}
+        {% elif message.tags == 'info' %}
+            {% include 'inc/messages/_info.html' %}
+
         {% comment %} Error list {% endcomment %}
         {% elif message.tags == 'warning' %}
             {% include 'inc/messages/_error_list.html' %}
         {% endif %}
+
+
 
     {% endfor %}
 {% endif %}
