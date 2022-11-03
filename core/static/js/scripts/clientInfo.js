@@ -5,6 +5,19 @@ class UserFormControl {
 
     constructor(kwargs) {
 
+        // -- alerts
+        const alerts = {
+            error: `<div class="alert alert-danger mt-3 shadow-sm alert-dismissible fade show border-0" role="alert">
+                        <div class="my-2">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="fa fa-exclamation-triangle me-2 fs-5" aria-hidden="true"></i>
+                                <h5 class="h5 m-0 p-0">Please fill in all the required information to complete creating your account</h5>
+                            </div>
+                            <button type="button" class="btn-close shadow-none border-none" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>`
+        }
+
         // <-- get elements from DOM
         this.kwargs = kwargs;
 
@@ -17,6 +30,7 @@ class UserFormControl {
 
         // * init edit event
         this.editEvent();
+        this.valid();
 
     }
 
@@ -70,6 +84,21 @@ class UserFormControl {
 
         // * init edit event
         this.editEvent();
+    }
+
+    // validation
+    valid() {
+
+        const forValidNames = ['first_name', 'email', 'company_email', 'company_name', 'company_tel', 'company_address'];
+
+        const forValidInputs = [];
+
+        forValidNames.map(name => {
+            forValidInputs.push(this.form.querySelector(`[name="${name}"]`));
+        });
+
+        console.log(forValidInputs);
+
     }
 }
 

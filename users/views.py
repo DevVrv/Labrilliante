@@ -314,7 +314,6 @@ def user_info(request):
         if user_form.is_valid():
             user_form.save()
         else:
-            print(123)
             messages.error(request, 'A user with this data already exists')
             return redirect(reverse_lazy('user_info'))
 
