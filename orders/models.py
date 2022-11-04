@@ -97,7 +97,7 @@ class Orders_Diamond_Model(models.Model):
 
     buyer = models.ForeignKey(CustomUsers, verbose_name="Buyer", on_delete=models.CASCADE, db_index=True)
     order = models.ForeignKey(Orders_model, verbose_name="Order ID", on_delete=models.CASCADE, db_index=True)
-    order_number = models.IntegerField(verbose_name="Order Number", db_index=True)
+    order_number = models.CharField(max_length=255, verbose_name="Order Number", db_index=True)
 
     def __str__(self):
         return f'Clarity: {self.clarity}, Color: {self.color}, Weight: {self.weight}'

@@ -14,6 +14,12 @@ from django.utils import timezone
 from tools.inspector import inspect_level, inspect_type
 
 
+from django.core import mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from core.settings import DEFAULT_FROM_EMAIL
+
+
 
 # * Get orders page
 def get_orders(request):
@@ -98,7 +104,6 @@ def create_order(request):
     }
 
     try:
-
         # * get cart items
         cart = CartModal.objects.get(user_id=request.user.id)
         user_cart = json.loads(cart.user_cart)
@@ -115,14 +120,16 @@ def create_order(request):
         # * create order number
         try:
             order_last = Orders_model.objects.all().order_by('-id')[0].id + 1
-        except Exception as ex:
-            order_last = 0
-
-        order_data['order_number'] = f'{order_data["user_id"]}{order_data["total_diamonds"]}{order_last}'
-        nulls = 10 - len(order_data['order_number'])
-        while nulls:
-            order_data['order_number'] = f'{order_data["order_number"]}0'
-            nulls -= 1
+        except:
+            order_last = 1
+        
+        length = 10 - len(f'{order_last}')
+        num = ''
+        while length > 0:
+            length -= 1
+            num += '0'
+        
+        order_data['order_number'] = str(num) + str(order_last)
 
         for key in requestData:
             if key != 'comment':
@@ -131,12 +138,11 @@ def create_order(request):
                 order_data[key] = requestData[key]
 
         # * create order and get order id
-
         order = Orders_model.objects.create(**order_data)
         order_item = Orders_model.objects.get(order_number=order_data['order_number'])
-
+        numb = order_data['order_number']
+        print(f'{numb}')
         # * create order diamonds list
-        
         order_keys = []
         for diamond in cart_diamonds:
             filter_diamonds_values = {
@@ -175,22 +181,48 @@ def create_order(request):
             }
             Orders_Diamond_Model.objects.create(**filter_diamonds_values)
             order_keys.append(diamond.key)
-       
+        
         # * update order diamonds list 
         order.diamonds_list = json.dumps(order_keys)
         order.save()
 
-        responce = {
-            'alert': 'success'
-        }
+        # <-- get email info
+        user = request.user
+        company = CompanyDetails.objects.get(user_id=user.id)
+        manager = CustomUsers.objects.get(pk = user.manager_id)
 
-    except Exception as ex:
-        print(ex)
-        responce = {
-            'alert': 'error',
-        }
-        
+        manager_email = manager.email or DEFAULT_FROM_EMAIL
 
+        # --> send mail
+        subject = 'New order'
+        html_message = render_to_string('_mail_new_order.html', {
+                'login': user.username,
+                'user_email': user.email,
+                'user_tel': user.tel,
+                'fname': user.first_name,
+                'lname': user.last_name,
+
+                'company_name': company.company_name,
+                'company_tel': company.company_tel,
+                'company_email': company.company_email,
+                'company_address': company.company_address,
+
+            })
+        plain_message = strip_tags(html_message)
+        from_email = DEFAULT_FROM_EMAIL
+        # sales@labrilliante.com
+        to = manager_email
+
+        mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
+
+        responce = {
+        'alert': 'success'
+    }
+    except:
+        responce = {
+            'alert': 'error'
+        }
     return HttpResponse (json.dumps(responce), content_type="application/json")
 
 # * order search form

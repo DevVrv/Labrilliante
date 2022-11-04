@@ -166,7 +166,7 @@ class SignInView(FormView):
                 
                 # --> send code
                 subject = 'Activation code for b2b.Labrilliante.com'
-                html_message = render_to_string('signin_code.html', {
+                html_message = render_to_string('_mail_confirm.html', {
                     'login': user.username,
                     'code': code 
                 })
@@ -208,14 +208,16 @@ def signup_finish(request):
 def confirm_user(request):
 
     # -- try to get user email and id
+    try:
+        timer = request.session['timer']
+    except KeyError:
+        timer = False
 
     try:
         # -- user email
         confirm_code = request.session['confirm_code']
         user_id = request.session['user_id']
         user = CustomUsers.objects.get(pk=user_id)
-        timer = request.session['timer'] or False
-
     except KeyError:
         # -- redirect to signin
         return redirect(reverse_lazy('signin'))
@@ -265,7 +267,7 @@ def confirm_user_again(request):
 
     # --> send code
     subject = 'Activation code for b2b.Labrilliante.com'
-    html_message = render_to_string('signin_code.html', {
+    html_message = render_to_string('_mail_confirm.html', {
         'login': user.username,
         'code': confirm_code 
     })
@@ -373,7 +375,7 @@ def user_info(request):
         user_email = user.email
         user_tel = user.tel
 
-        company = CompanyDetails.objects.get(pk=user.id)
+        company = CompanyDetails.objects.get(user_id=user.id)
         company_name = company.company_name
         company_email = company.company_email
         company_tel = company.company_tel
@@ -383,10 +385,10 @@ def user_info(request):
         manager_email = manager.email
 
         subject = f'User {user_login} has been updated'
-        html_message = render_to_string('user_info_mail.html', {
-            'user_first_name': user_first_name,
-            'user_last_name': user_last_name or '--',
-            'user_login': user_login,
+        html_message = render_to_string('_mail_user_updated.html', {
+            'fname': user_first_name,
+            'lname': user_last_name or '--',
+            'login': user_login,
             'user_tel': user_tel or '--',
             'user_email': user_email or '--',
 
