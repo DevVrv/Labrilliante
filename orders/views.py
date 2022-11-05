@@ -140,8 +140,7 @@ def create_order(request):
         # * create order and get order id
         order = Orders_model.objects.create(**order_data)
         order_item = Orders_model.objects.get(order_number=order_data['order_number'])
-        numb = order_data['order_number']
-        print(f'{numb}')
+
         # * create order diamonds list
         order_keys = []
         for diamond in cart_diamonds:
@@ -189,10 +188,9 @@ def create_order(request):
         # <-- get email info
         user = request.user
         company = CompanyDetails.objects.get(user_id=user.id)
-        manager = CustomUsers.objects.get(pk = user.manager_id)
-
+        manager = CustomUsers.objects.get(pk=user.manager_id)
         manager_email = manager.email or DEFAULT_FROM_EMAIL
-
+        print(requestData)
         # --> send mail
         subject = 'New order'
         html_message = render_to_string('_mail_new_order.html', {
@@ -206,6 +204,10 @@ def create_order(request):
                 'company_tel': company.company_tel,
                 'company_email': company.company_email,
                 'company_address': company.company_address,
+
+                'order_number': order_data['order_number'],
+                'order_comment': requestData['comment'],
+                'order_type': requestData['order_type']
 
             })
         plain_message = strip_tags(html_message)
