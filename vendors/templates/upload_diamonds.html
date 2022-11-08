@@ -31,6 +31,13 @@
                         <h3 class="h3 text-primary switch-title">White Diamonds</h3>
                     </div>
 
+                    
+                    {% comment %} * title * {% endcomment %}
+                    <div class="col-12 mt-4 d-flex align-items-center justify-content-center">
+                        <a href="{% static 'template/white_template.csv' %}" class="btn btn-secondary">Download the template</a>
+                    </div>
+
+
                     {% comment %} * messages * {% endcomment %}
                     {% include 'inc/messages/_messages.html' %}
                     {% include 'inc/messages/_msg.html' %}
@@ -95,14 +102,15 @@
                     {% endif %}
                 </div>
             </form>
-            
             {% comment %} form end {% endcomment %}
         </div>
+
     </div>
 {% endblock content %}
 
+{% comment %} * scripts * {% endcomment %}
 {% block scripts %}
 
-<script src="{% static 'js/public/bootstrap/bootstrap.bundle.min.js' %}"></script> 
+    <script src="{% static 'js/public/bootstrap/bootstrap.bundle.min.js' %}"></script> 
 
 {% endblock scripts %}

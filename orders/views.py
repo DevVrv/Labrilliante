@@ -190,7 +190,7 @@ def create_order(request):
         company = CompanyDetails.objects.get(user_id=user.id)
         manager = CustomUsers.objects.get(pk=user.manager_id)
         manager_email = manager.email or DEFAULT_FROM_EMAIL
-        print(requestData)
+
         # --> send mail
         subject = 'New order'
         html_message = render_to_string('_mail_new_order.html', {

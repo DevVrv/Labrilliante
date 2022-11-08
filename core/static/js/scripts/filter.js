@@ -1235,9 +1235,6 @@ class Comparison extends Control {
             if (this.share.data.comparing.length > 0) {
                 // <-- get radio value 
                 this.share.radio.map(inp => {
-                    if (inp.checked == true) {
-                        this.share.data.share = inp.value;
-                    }
                 });
 
                 // --> send ajax

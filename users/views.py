@@ -24,6 +24,9 @@ import random
 # @ Tools
 from tools.inspector import inspect_level, inspect_type
 
+# @ reciver
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 # ! --------------- Views --------------- ! #
 
@@ -488,3 +491,27 @@ def logout_view(request):
     logout(request)
 
     return redirect(reverse_lazy('signin'))
+
+
+# * ------------------------------------------------------------------- update user level
+@receiver(pre_save, sender=CustomUsers)
+def on_change(sender, instance: CustomUsers, **kwargs):
+    if instance.id is None: # new object will be created
+        pass # write your code here
+    else:
+        previous = CustomUsers.objects.get(id=instance.id)
+        if previous.level != instance.level: # field will be updated
+            if previous.level < instance.level and instance.level >= 2:
+                subject = 'Raising the level'
+                html_message = render_to_string('_mail_user_raise.html', {
+                    'title': 'Your level has been upgraded',
+                    'message': 'New features are available to you on the site',
+                    'level': instance.level,
+                })
+                plain_message = strip_tags(html_message)
+                from_email = DEFAULT_FROM_EMAIL
+                to = instance.email
+
+                mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            
+

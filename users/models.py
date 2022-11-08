@@ -1,8 +1,5 @@
-from enum import unique
 from django.db import models
-
 from django.contrib.auth.models import AbstractUser
-
 
 # --- models creation --- #
 
@@ -83,3 +80,7 @@ class ShippingAddress(models.Model):
         verbose_name = 'Shipping Address'
         verbose_name_plural = 'Shipping Address'
         ordering = ['pk']  
+
+
+
+
