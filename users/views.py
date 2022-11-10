@@ -365,52 +365,51 @@ def user_info(request):
                     ship.save()
                     exists = False
 
-        # -- success message create
-        messages.success(request, 'Data has been successfully changed')
+        if shipping_formset.has_changed() or user_form.has_changed() or company_form.has_changed():
+            # -- success message create
+            messages.success(request, 'Data has been successfully changed. The manager assigned to you will contact you soon')
 
+            # --> send email for manager
+            user = request.user
+            user_login = user.username
+            user_first_name = user.first_name
+            user_last_name = user.last_name
+            user_email = user.email
+            user_tel = user.tel
 
-        # --> send email for manager
+            company = CompanyDetails.objects.get(user_id=user.id)
+            company_name = company.company_name
+            company_email = company.company_email
+            company_tel = company.company_tel
+            company_address = company.company_address
 
-        user = request.user
-        user_login = user.username
-        user_first_name = user.first_name
-        user_last_name = user.last_name
-        user_email = user.email
-        user_tel = user.tel
+            manager = CustomUsers.objects.get(pk=user.manager.id)
+            manager_email = manager.email
 
-        company = CompanyDetails.objects.get(user_id=user.id)
-        company_name = company.company_name
-        company_email = company.company_email
-        company_tel = company.company_tel
-        company_address = company.company_address
+            subject = f'User {user_login} has been updated'
+            html_message = render_to_string('_mail_user_updated.html', {
+                'fname': user_first_name,
+                'lname': user_last_name or '--',
+                'login': user_login,
+                'user_tel': user_tel or '--',
+                'user_email': user_email or '--',
 
-        manager = CustomUsers.objects.get(pk=user.manager.id)
-        manager_email = manager.email
+                'company_name': company_name,
+                'company_email': company_email,
+                'company_tel': company_tel,
+                'company_address': company_address,
+            })
+            plain_message = strip_tags(html_message)
+            from_email = DEFAULT_FROM_EMAIL
+            if manager_email == '':
+                to = DEFAULT_FROM_EMAIL
+            else:
+                to = manager_email
 
-        subject = f'User {user_login} has been updated'
-        html_message = render_to_string('_mail_user_updated.html', {
-            'fname': user_first_name,
-            'lname': user_last_name or '--',
-            'login': user_login,
-            'user_tel': user_tel or '--',
-            'user_email': user_email or '--',
-
-            'company_name': company_name,
-            'company_email': company_email,
-            'company_tel': company_tel,
-            'company_address': company_address,
-        })
-        plain_message = strip_tags(html_message)
-        from_email = DEFAULT_FROM_EMAIL
-        if manager_email == '':
-            to = DEFAULT_FROM_EMAIL
+            mail_result = mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
         else:
-            to = manager_email
+            messages.info(request, 'You haven\'t made any changes')
 
-        mail_result = mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
-
-
-        # -- update user info
         return redirect(reverse_lazy('user_info'))
 
     # @ GET
@@ -424,7 +423,7 @@ def user_info(request):
     company_form = getCompany(request)
 
     # * shipping address
-    shipping_items = ShippingAddress.objects.filter(user_id=request.user.pk)
+    shipping_items = ShippingAddress.objects.filter(user_id=request.user.id)
 
     # * single form
     

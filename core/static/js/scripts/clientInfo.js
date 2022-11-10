@@ -1,6 +1,6 @@
 "use strict";
     
-// * user info from control
+// -- user info from control
 class UserFormControl {
 
     constructor(kwargs) {
@@ -44,20 +44,30 @@ class UserFormControl {
     editEvent() {
 
         this.edit.onclick = () => {
-            console.log(this);
-            if (this.edit.dataset.edit == "hide") {
+
+            if (this.edit.dataset.edit !== "show") {
+
+                // ev show all inputs
                 this.inputs.map(input => { input.removeAttribute('disabled'); });
                 this.labels.map(label => { label.classList.add('active'); })
                 this.buttons.map(btn => { btn.removeAttribute('disabled'); btn.classList.add('active'); })
-                this.edit.dataset.edit = "show";
                 this.password.removeAttribute('disabled'); this.password.classList.add('active');
+                this.edit.dataset.edit = "show";
+
+                // ev update edit text view "show"
+                this.edit.textContent = 'Stop edit';
             }
-            else if (this.edit.dataset.edit == "show") {
+            else if (this.edit.dataset.edit !== "hide") {
+                
+                // ev hide all inputs
                 this.inputs.map(input => { input.setAttribute('disabled', ''); });
                 this.labels.map(label => { label.classList.remove('active'); })
                 this.buttons.map(btn => { btn.setAttribute('disabled', ''); btn.classList.remove('active'); })
                 this.edit.dataset.edit = "hide";
                 this.password.setAttribute('disabled', ''); this.password.classList.remove('active');
+                
+                // ev update edit text view "hide"
+                this.edit.textContent = 'Edit information';
             }
             
         };
@@ -147,7 +157,7 @@ class UserFormControl {
     }
 }
 
-// * add shipping
+// -- add shipping
 class AddShipping {
     constructor(kwargs) {
 
@@ -262,7 +272,7 @@ class AddShipping {
 
 }
 
-// --> DOM on load
+// ev DOM on load
 document.addEventListener("DOMContentLoaded", () => {
 
     // * toggle client info item
@@ -294,3 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
+
+
+
+
