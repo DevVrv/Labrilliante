@@ -8,7 +8,7 @@ import json
 from .models import Diamond_Model, MaxMin
 from cart.models import CartModal
 from tools.inspector import inspect_level, inspect_type
-
+from django.contrib import messages
 # <------------------------------ get filter page
 def filterPage(request):
 

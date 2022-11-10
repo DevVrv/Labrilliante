@@ -14,6 +14,7 @@ class UserFormControl {
         this.labels = this._getElems(kwargs.labels, this.form);
         this.buttons = this._getElems(kwargs.buttons, this.form);
         this.edit = this._getElem(kwargs.edit, this.form);
+        this.password = this._getElem(kwargs.password);
 
         // * init edit event
         this.editEvent();
@@ -43,18 +44,20 @@ class UserFormControl {
     editEvent() {
 
         this.edit.onclick = () => {
-
+            console.log(this);
             if (this.edit.dataset.edit == "hide") {
                 this.inputs.map(input => { input.removeAttribute('disabled'); });
                 this.labels.map(label => { label.classList.add('active'); })
                 this.buttons.map(btn => { btn.removeAttribute('disabled'); btn.classList.add('active'); })
-                this.edit.dataset.edit = "show"
+                this.edit.dataset.edit = "show";
+                this.password.removeAttribute('disabled'); this.password.classList.add('active');
             }
             else if (this.edit.dataset.edit == "show") {
                 this.inputs.map(input => { input.setAttribute('disabled', ''); });
                 this.labels.map(label => { label.classList.remove('active'); })
                 this.buttons.map(btn => { btn.setAttribute('disabled', ''); btn.classList.remove('active'); })
-                this.edit.dataset.edit = "hide"
+                this.edit.dataset.edit = "hide";
+                this.password.setAttribute('disabled', ''); this.password.classList.remove('active');
             }
             
         };
@@ -92,6 +95,7 @@ class UserFormControl {
         // <-- get required
         const forValidNames = ['first_name', 'email', 'company_email', 'company_name', 'company_tel', 'company_address'];
         const forValidInputs = [];
+        const formInvalidInputs = []
         forValidNames.map(name => {
             forValidInputs.push(this.form.querySelector(`[name="${name}"]`));
         });
@@ -106,6 +110,7 @@ class UserFormControl {
                 if (inp.value == '' || inp.value.replace(/\s/g,'') == '') {
                     inp.classList.add('form-error');
                     valid = false;
+                    formInvalidInputs.push(inp);
                 }
 
             });
@@ -113,13 +118,25 @@ class UserFormControl {
 
             if (valid == false) {
                 forValidInputs.map(inp => {
-                    inp.onmouseover = () => {
+                    inp.onfocus = () => {
                         inp.classList.remove('form-error');
                     };
                 });
                 const exAlert = this.form.closest('.main').querySelector('.alert');
                 if (exAlert !== undefined && exAlert !== null) {exAlert.remove();}
                 this.form.insertAdjacentHTML('beforebegin', alerts.error);
+
+                formInvalidInputs.map(elem => {
+                    const managed = elem.closest('.client-info-managed');
+                    const managedTitle = managed.previousElementSibling
+                    if (!managed.classList.contains('active')) {
+                        managed.classList.add('active');
+                    }
+                    if (!managedTitle.classList.contains('active')) {
+                        managedTitle.classList.add('active');
+                    }
+                });
+
             }
             else if (valid == true) {
                 e.target.submit();
@@ -259,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const formControl = new UserFormControl({
         form: '#client-info-form',
         edit: '[data-edit]',
+        password: '#change-password',
         labels: '.client-info__input-group--name',
         inputs: '.form-control-client-info',
         buttons: '[data-hide-btn]'

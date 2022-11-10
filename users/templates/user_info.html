@@ -9,7 +9,6 @@
 {% comment %} * content block * {% endcomment %}
 {% block content %}
 
-    
     {% include 'inc/_canvas.html' %}
     {% include 'inc/_indev.html' %}
 
@@ -17,7 +16,7 @@
 
         {% include 'inc/_header.html' %}
 
-        <main class="main">
+        <main class="main mt-4">
             <div class="container-fluid px-5 py-5 container-client-info">
                 
                 {% comment %} messages {% endcomment %}
@@ -34,9 +33,6 @@
                         
                         
                         <div class="client-info__header--buttons d-flex py-2 text-nowrap">
-
-                            <a href="{% url 'change_pass' %}" 
-                            class="btn btn-secondary me-3" id="change-password" disabled data-hide-btn="">Change Password</a>
 
                             <button type="submit" 
                             class="btn btn-primary me-3" 
@@ -219,17 +215,25 @@
                 </form>
                 <!-- - client info add shipping address - -->
                 <div class="client-info__shipping-add mt-4 border p-4 py-3 rounded shadow-sm d-flex justify-content-end">
-                    <button type="button"
-                        class="btn btn-primary px-4 d-flex justify-content-center align-items-center"
-                        id="add-shipping-address">Add Shipping Address <i class="fa fa-plus ms-1"
-                            aria-hidden="true"></i></button>
+                    <div class="d-block">
+                        <a href="{% url 'change_pass' %}" 
+                                class="btn btn-secondary me-3" id="change-password" disabled data-hide-btn="">Change Password</a>
+                    </div>
+
+                    <button type="button" 
+                        class="btn btn-secondary px-4 d-flex justify-content-center align-items-center"
+                        id="add-shipping-address">Add Shipping Address 
+                        <i class="fa fa-plus ms-1" aria-hidden="true"></i>
+                    </button>
                 </div>
-                    
+                
+
     
             </div>
         </main>
 
     </div>
+
 {% endblock content %}
 
 {% comment %} * scripts block * {% endcomment %}

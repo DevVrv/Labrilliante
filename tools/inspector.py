@@ -1,10 +1,14 @@
+from django.contrib import messages
+
 def inspect_level(request, number = 0):
     if request.user.is_authenticated:
         if request.user.level >= number or request.user.is_superuser == 1:
             return True
         else:
+            messages.error(request, 'Please fill in the necessary information in your profile details to start your diamond search')
             return False
     else:
+        messages.error(request, 'Please fill in the necessary information in your profile details to start your diamond search')
         return False
 
 def inspect_type(request, type_num):
